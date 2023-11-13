@@ -47,6 +47,21 @@ app.get('/download/:key', (req, res) => {
   fileStream.pipe(res);
 });
 
+// Nuevo endpoint para listar archivos
+app.get('/listar-archivos', async (req, res) => {
+  const params = { Bucket: config.aws.bucketName, Prefix: 'files-api/' };
+
+  try {
+    const data = await s3.listObjectsV2(params).promise();
+    const archivos = data.Contents.map((objeto) => objeto.Key);
+
+    res.json({ archivos });
+  } catch (error) {
+    console.error('Error al listar archivos:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
